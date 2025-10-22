@@ -1,264 +1,466 @@
-# Create a polished, multi-language restaurant site (Bull & Last style) with a language chooser shown first.
-# Default selection is Hebrew; choice is saved. Includes a hero header, translatable navbar, drinks menu, and cart.
-import os, zipfile, textwrap, base64
-
-# Use the provided logo as the restaurant image
-with open("/mnt/data/9f689686-5c7d-4dfb-9997-fe80284482ba.png", "rb") as f:
-    logo_b64 = base64.b64encode(f.read()).decode("ascii")
-
-html = f"""<!doctype html>
-<html lang="he" dir="rtl">
+<!DOCTYPE html>
+<html lang="ar">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>חומוס גרגירים — אתר רשמי</title>
-<meta name="theme-color" content="#214A47">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>חומוס גרגירים — Menu</title>
 <style>
-  :root {{
-    --green:#214A47; --cream:#f5f1eb; --gold:#D4AF37; --text:#111; --white:#fff;
-    --dark:#0c0c0c; --muted:#7c8b88; --ring:rgba(212,175,55,.45);
-  }}
-  * {{ box-sizing: border-box; }}
-  html,body {{ margin:0; padding:0; font-family: 'Cairo', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }}
-  body {{ background: var(--cream); color: var(--text); }}
-  a {{ color: inherit; text-decoration: none; }}
-  .container {{ max-width: 1200px; margin: 0 auto; padding: 0 18px; }}
-
-  /* Top bar */
-  .topbar {{ background: var(--green); color: var(--white); position: sticky; top:0; z-index:50; }}
-  .nav {{ display:flex; align-items:center; justify-content:space-between; padding: 14px 10px; }}
-  .brand {{ font-size: 28px; letter-spacing:1px; font-weight:800; }}
-  .brand span {{ display:block; font-size:14px; color: rgba(255,255,255,.85); font-weight:500; }}
-  .menu {{ display:flex; gap:18px; align-items:center; flex-wrap:wrap; }}
-  .menu a {{ opacity:.95 }}
-  .menu a.active {{ border-bottom:2px solid var(--gold); padding-bottom:2px; }}
-  .actions {{ display:flex; gap:10px; align-items:center; }}
-  .btn-gold {{ background: linear-gradient(135deg,var(--gold),#e6c663); color:#000; border:none; border-radius:999px; padding:8px 16px; font-weight:700; cursor:pointer; }}
-  .btn-outline {{ background:transparent; border:1px solid rgba(255,255,255,.6); color:#fff; border-radius:999px; padding:6px 12px; cursor:pointer; }}
-
-  /* Hero */
-  .hero-wrap {{ background: var(--green); color:#fff; }}
-  .hero {{ position:relative; padding: 26px 0 40px; }}
-  .hero-image {{ width:100%; aspect-ratio: 16/7; background:
-      linear-gradient(180deg, rgba(0,0,0,.0) 0%, rgba(0,0,0,.45) 100%),
-      url('data:image/png;base64,{logo_b64}') center/contain no-repeat,
-      #1f4946; border: 10px solid var(--green); }}
-  .hero-title {{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:none; font-weight:800;
-                 text-shadow:0 6px 22px rgba(0,0,0,.35); }}
-  .hero-title h1 {{ font-size: clamp(28px,4.8vw,44px); margin:0; }}
-  .hero-title small {{ opacity:.9 }}
-
-  /* Sections */
-  .section {{ padding: 36px 0; }}
-  .section h2 {{ margin:0 0 12px; color: var(--green); letter-spacing:.6px; }}
-  .grid {{ display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); }}
-  .card {{ background:#fff; border:1px solid #e3dfd8; border-radius:18px; padding:16px; box-shadow: 0 10px 24px rgba(0,0,0,.06); }}
-  .price {{ color:#b66b00; font-weight:800; }}
-  .add {{ margin-top:8px }}
-  .tiny {{ font-size:12px; color:#666 }}
-  footer {{ text-align:center; padding:28px 0; color:#666; border-top:1px dashed #ddd; }}
-
-  /* Language chooser (first screen) */
-  .lang-overlay {{ position:fixed; inset:0; background: rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; z-index:999; }}
-  .lang-card {{ width:min(720px,92vw); background:#0b0b0b; color:#fff; border:1px solid var(--ring); border-radius:22px; padding:20px;
-                box-shadow:0 20px 60px rgba(0,0,0,.45); text-align:center; }}
-  .lang-card img {{ width:110px; border-radius:14px; filter: drop-shadow(0 6px 16px rgba(212,175,55,.25)); }}
-  .lang-buttons {{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:12px; }}
-  .lang-btn {{ background: linear-gradient(135deg,var(--gold),#e67e22); border:none; color:#0b0b0b; padding:10px 16px; border-radius:999px; font-weight:800; cursor:pointer; }}
-  .lang-note {{ opacity:.85; margin-top:8px; font-size:13px; }}
-  .hide {{ display:none !important; }}
-
+  :root{
+    --orange:#F26A21;
+    --black:#0B0B0B;
+    --white:#FFFFFF;
+    --bg:#0B0B0B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#fff}
+  a{color:inherit;text-decoration:none}
+  .container{max-width:1080px;margin:0 auto;padding:0 16px}
+  header{position:sticky;top:0;z-index:50;background:var(--black);border-bottom:1px solid #141414}
+  header .inner{display:flex;align-items:center;gap:12px;padding:12px 0}
+  .pill{display:inline-flex;align-items:center;border-radius:999px;padding:4px 10px;background:var(--orange);color:#fff;font-size:12px;font-weight:700}
+  nav{margin-inline-start:auto;display:flex;gap:16px;align-items:center}
+  nav .btn{background:var(--orange);color:#000;border-radius:999px;padding:6px 12px;font-weight:800}
+  .hero{padding:48px 0;background:var(--black)}
+  .hero h1{font-size:40px;margin:0 0 8px}
+  .hero p{opacity:.9;font-size:18px;margin:0 0 16px}
+  .btn-outline{border:2px solid var(--orange);border-radius:16px;padding:10px 16px;font-weight:800;background:transparent;color:#fff}
+  .btn-solid{background:var(--orange);border-radius:16px;padding:10px 16px;font-weight:800;color:#000}
+  section.white{background:#fff;color:#000}
+  .grid{display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:780px){.grid{grid-template-columns:1fr 1fr}}
+  .card{background:#f9f9f9;border-radius:16px;padding:14px;box-shadow:0 4px 18px rgba(0,0,0,.08);cursor:pointer;border:0}
+  .card .price{color:var(--orange);font-weight:900}
+  h2.cat{font-size:26px;margin:32px 0 12px}
+  /* Language gate */
+  .gate{position:fixed;inset:0;background:#000000ee;display:flex;align-items:center;justify-content:center;z-index:100}
+  .gate .box{background:#121212;border-radius:20px;padding:24px;width:min(92vw,520px);text-align:center}
+  .gate .langs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .gate .langs button{border:2px solid var(--orange);background:#fff;color:#000;border-radius:14px;padding:10px 12px;font-weight:800;cursor:pointer}
+  /* Modal */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:90}
+  .modal.active{display:flex}
+  .modal .panel{background:#0e0e0e;color:#fff;border-radius:18px;overflow:hidden;width:min(92vw,720px);max-height:80vh;display:flex;flex-direction:column}
+  .modal header{position:static;background:#0e0e0e;border-bottom:1px solid #1c1c1c}
+  .modal header .title{font-size:20px;font-weight:900}
+  .scroll{padding:16px;overflow:auto}
+  .group{background:#121212;border-radius:14px;padding:12px;margin:10px 0}
+  .group .label{font-weight:800;margin-bottom:8px}
+  .option{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;cursor:pointer}
+  .checkbox{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;border:2px solid #00A3FF;background:transparent;margin-inline-end:8px}
+  .checkbox.checked{background:#00A3FF}
+  .checkbox span{display:none}
+  .checkbox.checked span{display:block;color:#fff;font-size:12px;line-height:1}
+  .modal footer{border-top:1px solid #1c1c1c;padding:12px;display:flex;align-items:center;gap:8px}
+  .qty{display:flex;align-items:center;border:2px solid var(--orange);border-radius:12px;overflow:hidden}
+  .qty button{background:transparent;border:0;color:#fff;padding:6px 10px;font-size:18px;cursor:pointer}
+  .qty div{padding:0 12px}
   /* Cart */
-  .cart-panel {{ position:fixed; right:16px; bottom:16px; width:min(92vw,420px); background:#0f0f0f; color:#fff;
-                 border:1px solid var(--ring); border-radius:18px; padding:14px; display:none; z-index:60; }}
-  .cart-row {{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px dashed rgba(255,255,255,.16); }}
-  .qty {{ display:flex; align-items:center; gap:8px; }}
-  .qty button {{ background:#1d1d1d; border:1px solid rgba(255,255,255,.26); color:#fff; width:30px; height:30px; border-radius:999px; cursor:pointer; }}
+  .dock{position:fixed;bottom:12px;inset-inline-end:12px;display:flex;flex-direction:column;gap:10px;align-items:flex-end;z-index:60}
+  .lang-switch{display:flex;border:2px solid var(--orange);border-radius:16px;overflow:hidden;background:#fff}
+  .lang-switch button{padding:6px 10px;border:0;font-weight:800;cursor:pointer}
+  .cart{width:300px;background:#0f0f0f;color:#fff;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,.35);padding:12px}
+  .cart .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .cart .sum{color:var(--orange);font-weight:900}
+  .cart .line{background:#141414;border-radius:12px;padding:8px;margin:6px 0;display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .cart .muted{opacity:.75;font-size:12px}
+  footer.site{padding:24px 0;background:#0B0B0B;color:#fff;text-align:center;border-top:1px solid #141414;margin-top:24px}
+  .about{padding:40px 0;background:#0B0B0B}
+  .about .grid2{display:grid;gap:16px}
+  @media(min-width:920px){.about .grid2{grid-template-columns:1fr 1fr}}
+  .btn-total{background:var(--orange);color:#000;font-weight:900;border-radius:14px;padding:10px 14px;border:0;cursor:pointer}
 </style>
 </head>
 <body>
-
-<!-- Language chooser (shown on first visit) -->
-<div id="langOverlay" class="lang-overlay">
-  <div class="lang-card">
-    <img src="data:image/png;base64,{logo_b64}" alt="logo" />
-    <h3 style="margin:10px 0 2px; color:var(--gold);">חומוס גרגירים</h3>
-    <div id="langTitle" class="tiny">בחר שפה / اختر لغة / Choose Language / Выберите язык</div>
-    <div class="lang-buttons">
-      <button class="lang-btn" onclick="setLang('he')">🇮🇱 עברית</button>
-      <button class="lang-btn" onclick="setLang('ar')">🇸🇦 العربية</button>
-      <button class="lang-btn" onclick="setLang('en')">🇬🇧 English</button>
-      <button class="lang-btn" onclick="setLang('ru')">🇷🇺 Русский</button>
+  <header>
+    <div class="container inner">
+      <div style="font-weight:900;letter-spacing:.3px">חומוס גרגירים</div>
+      <span class="pill" id="tagline">חוויה בכל ביס</span>
+      <nav>
+        <a href="#menu" id="nav-menu">תפריט</a>
+        <a class="btn" id="nav-order" target="_blank">הזמנת אוכל</a>
+        <a href="#about" id="nav-about">מי אנחנו</a>
+      </nav>
     </div>
-    <div class="lang-note">اللغة الافتراضية: עברית</div>
-  </div>
-</div>
+  </header>
 
-<!-- Top navigation -->
-<div class="topbar">
-  <div class="nav container">
-    <div class="brand">חומוס גרגירים<span id="brandSmall">Fine Hummus</span></div>
-    <nav class="menu" id="menuNav">
-      <a href="#" class="active" data-key="home">בית</a>
-      <a href="#menus" data-key="menus">תפריטים</a>
-      <a href="#shop" data-key="shop">חנות</a>
-      <a href="#events" data-key="events">אירועים</a>
-      <a href="#contact" data-key="contact">צור קשר</a>
-    </nav>
-    <div class="actions">
-      <button class="btn-outline" id="cartBtn">🛒 <span id="navCart">עגלה (0)</span></button>
-      <button class="btn-gold" id="reserveBtn" data-key="reserve">הזמנות</button>
-      <button class="btn-outline" onclick="openLang()">🌐</button>
-    </div>
-  </div>
-</div>
-
-<!-- Hero -->
-<div class="hero-wrap">
-  <div class="hero container">
-    <div class="hero-image"></div>
-    <div class="hero-title">
+  <section class="hero">
+    <div class="container">
+      <h1 id="hero-title">חומוס גרגירים</h1>
+      <p id="hero-sub">מסעדה לאוכל מהיר וטעים – יותר מעשרה סוגים ומשלוח לכל מקום.</p>
       <div>
-        <h1 id="heroTitle">MENUS</h1>
-        <small id="heroSubtitle">A royal culinary experience</small>
+        <a href="#menu" class="btn-outline" id="hero-menu">לתפריט</a>
+        <a class="btn-solid" id="hero-order" target="_blank">הזמנה עכשיו</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="white" id="menu">
+    <div class="container" id="catalog-root"></div>
+  </section>
+
+  <section class="about" id="about">
+    <div class="container grid2">
+      <div>
+        <h2 id="about-title" style="margin:0 0 8px;font-size:26px">מי אנחנו</h2>
+        <p id="about-text" style="opacity:.9">
+          ב-חומוס גרגירים אנו מכינים חומוס טרי מדי יום מהגרגרים הטובים ביותר. מעל עשרה סוגים ומשלוח מהיר לכל מקום באזור.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+          <a id="tel-link" class="btn-solid" href="tel:035366667">התקשרו: 035366667</a>
+          <a id="map-link" class="btn-outline" target="_blank">מיקום המסעדה</a>
+        </div>
+        <div style="margin-top:16px">
+          <h3 id="hours-title" style="margin:0 0 6px">שעות פעילות</h3>
+          <div id="hours-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+        </div>
+      </div>
+      <div>
+        <div style="background:#fff;border-radius:16px;overflow:hidden">
+          <a id="map-img-link" target="_blank">
+            <div style="aspect-ratio:16/9;background:#eee;display:flex;align-items:center;justify-content:center;color:#444">Map</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site">
+    © <span id="year"></span> חומוס גרגירים — <span id="rights">כל הזכויות שמורות</span>
+  </footer>
+
+  <!-- Language gate -->
+  <div class="gate" id="gate">
+    <div class="box">
+      <h2 style="margin:0 0 6px">חומוס גרגירים</h2>
+      <div style="opacity:.9">اختر اللغة • בחרו שפה • Choose language • Выберите язык</div>
+      <div class="langs">
+        <button data-lang="ar">العربية</button>
+        <button data-lang="he">עברית</button>
+        <button data-lang="en">English</button>
+        <button data-lang="ru">Русский</button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Content -->
-<section class="section container" id="menus">
-  <h2 id="drinksTitle">שתייה</h2>
-  <div class="grid" id="drinks"></div>
-</section>
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="panel">
+      <header class="inner" style="padding:10px 16px">
+        <div class="title" id="modal-title">Item</div>
+        <button id="modal-close" style="margin-inline-start:auto;font-size:22px;background:transparent;border:0;color:#fff;cursor:pointer">×</button>
+      </header>
+      <div class="scroll" id="modal-body"></div>
+      <footer>
+        <div class="qty">
+          <button id="qty-dec">−</button><div id="qty-val">1</div><button id="qty-inc">+</button>
+        </div>
+        <button class="btn-total" id="add-to-cart">Add — ₪ 0</button>
+      </footer>
+    </div>
+  </div>
 
-<!-- Cart panel -->
-<div id="cartPanel" class="cart-panel"></div>
-
-<footer>© 2025 חומוס גרגירים — All rights reserved.</footer>
+  <!-- Dock: language + cart -->
+  <div class="dock">
+    <div class="lang-switch" id="lang-switch">
+      <button data-lang="ar">العربية</button>
+      <button data-lang="he">עברית</button>
+      <button data-lang="en">EN</button>
+      <button data-lang="ru">RU</button>
+    </div>
+    <div class="cart">
+      <div class="head"><div id="cart-title">Cart / السلة</div><div class="sum" id="cart-sum">₪ 0</div></div>
+      <div id="cart-lines" style="max-height:200px;overflow:auto"></div>
+      <div class="muted" id="cashier-note">الدفع يتم عند الاستلام في الكاشير — لا يوجد دفع أونلاين.</div>
+    </div>
+  </div>
 
 <script>
 // ===== Translations =====
-const T = {{
-  he: {{home:'בית', menus:'תפריטים', shop:'חנות', events:'אירועים', contact:'צור קשר', reserve:'הזמנות',
-        brandSmall:'חוויה קולינרית', heroTitle:'תפריטים', heroSubtitle:'חוויה מלכותית',
-        drinks:'שתייה', add:'הוסף לעגלה', cart:'עגלה', total:'סה״כ', checkout:'תשלום בקופה', currency:'₪'}},
-  ar: {{home:'الرئيسية', menus:'المنيو', shop:'المتجر', events:'الفعاليات', contact:'تواصل', reserve:'الحجوزات',
-        brandSmall:'تجربة ذواقة', heroTitle:'القوائم', heroSubtitle:'تجربة ملكية',
-        drinks:'المشروبات', add:'أضف إلى السلة', cart:'السلة', total:'الإجمالي', checkout:'الدفع عند الكاشير', currency:'₪'}},
-  en: {{home:'Home', menus:'Menus', shop:'Shop', events:'Events', contact:'Contact', reserve:'Reservations',
-        brandSmall:'Culinary Experience', heroTitle:'MENUS', heroSubtitle:'A royal culinary experience',
-        drinks:'Drinks', add:'Add to Cart', cart:'Cart', total:'Total', checkout:'Pay at cashier', currency:'₪'}},
-  ru: {{home:'Главная', menus:'Меню', shop:'Магазин', events:'События', contact:'Контакты', reserve:'Бронирование',
-        brandSmall:'Гастрономический опыт', heroTitle:'МЕНЮ', heroSubtitle:'Королевский опыт',
-        drinks:'Напитки', add:'Добавить в корзину', cart:'Корзина', total:'Итого', checkout:'Оплата на кассе', currency:'₪'}}
-}};
+const T = {
+  ar:{localeName:'العربية',dir:'rtl',brandTagline:'تجربة بكل لقمة',nav:{menu:'المنيو',order:'طلب طعام',about:'من نحن'},hero:{title:'חומוס גרגירים',subtitle:'مطعم يقدم أكلات سريعة ولذيذة — أكثر من عشرة أصناف، مع توصيل إلى أي مكان.',ctaMenu:'استعرض المنيو',ctaOrder:'اطلب الآن'},about:{title:'من نحن',text:'في חומוס גרגירים نُحضّر الحُمُّص يوميًا من أفضل الحبوب. تجد عندنا أكثر من عشرة أصناف، وخدمة توصيل سريعة إلى أي مكان في المنطقة.',location:'موقع المطعم',callUs:'اتصال',hours:'ساعات العمل'},rights:'جميع الحقوق محفوظة',hoursDays:['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],hoursLine:'الأحد–السبت: 10:00 ص – 1:00 ص',cart:'السلة',add:'أضف'}, 
+  he:{localeName:'עברית',dir:'rtl',brandTagline:'חוויה בכל ביס',nav:{menu:'תפריט',order:'הזמנת אוכל',about:'מי אנחנו'},hero:{title:'חומוס גרגירים',subtitle:'מסעדה לאוכל מהיר וטעים – יותר מעשרה סוגים ומשלוח לכל מקום.',ctaMenu:'לתפריט',ctaOrder:'הזמנה עכשיו'},about:{title:'מי אנחנו',text:'ב-חומוס גרגירים אנו מכינים חומוס טרי מדי יום מהגרגרים הטובים ביותר. מעל עשרה סוגים ומשלוח מהיר לכל מקום באזור.',location:'מיקום המסעדה',callUs:'התקשרו',hours:'שעות פעילות'},rights:'כל הזכויות שמורות',hoursDays:['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'],hoursLine:'א׳–ש׳: 10:00–01:00',cart:'עגלה',add:'הוסף'}, 
+  en:{localeName:'English',dir:'ltr',brandTagline:'A bite above the rest',nav:{menu:'Menu',order:'Order Food',about:'About'},hero:{title:'חומוס גרגירים',subtitle:'Fast and tasty eats — 10+ varieties with delivery anywhere.',ctaMenu:'Browse Menu',ctaOrder:'Order Now'},about:{title:'About',text:'At חומוס גרגירים we make hummus fresh daily from premium chickpeas. Choose from 10+ items with speedy delivery anywhere in the area.',location:'Restaurant Location',callUs:'Call Us',hours:'Opening Hours'},rights:'All rights reserved',hoursDays:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],hoursLine:'Sun–Sat: 10:00–01:00',cart:'Cart',add:'Add'}, 
+  ru:{localeName:'Русский',dir:'ltr',brandTagline:'Вкус на каждом укусе',nav:{menu:'Меню',order:'Заказ еды',about:'О нас'},hero:{title:'חומוס גרגירים',subtitle:'Быстрая и вкусная еда — более 10 позиций, доставка куда угодно.',ctaMenu:'Открыть меню',ctaOrder:'Заказать'},about:{title:'О нас',text:'В חומוס גרגירים мы ежедневно готовим свежий хумус из лучших нутовых зёрен. Более 10 блюд и быстрая доставка куда угодно.',location:'Расположение',callUs:'Позвонить',hours:'Часы работы'},rights:'Все права защищены',hoursDays:['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],hoursLine:'Вс–Сб: 10:00–01:00',cart:'Корзина',add:'Добавить'}
+};
+const WOLT_URL = "https://wolt.com/he/isr/tel-aviv/restaurant/hummus-gargerim?utm_source=googlemapreserved&utm_campaign=hummus-gargerim&utm_content=64ae8b9b04e67c0d9c4caaa6&rwg_token=ACgRB3e3AEvanF_rf0aocU0TZqf-A0bXcjBDAMHo0uH5Qnr0ThUuNAwovlcu_ifLs-Ciqhk84FvJysHJSlknjposiHsWGfWYdXJTmUMkLgbkZ5fIGKYBXQQ%3D";
+const MAPS_URL = "https://maps.app.goo.gl/3nfkX5F877Xcjy5o7";
+const PHONE = "035366667";
 
-// ===== Drinks =====
-const DRINKS = [
-  {{id:'d1', price:9,  name:{{he:'מי םודה', ar:'מי םודה', en:'Mei Modaa', ru:'Мей Модаа'}}}},
-  {{id:'d2', price:10, name:{{he:'קוקה קולה (רגילה / דיאט)', ar:'كوكاكولا (العادية / الدايت)', en:'Coca-Cola (Regular / Diet)', ru:'Кока-Кола (Обычная / Диетическая)'}}}},
-  {{id:'d3', price:12, name:{{he:'שוופס (כל הטעמים)', ar:'شويبس (جميع الأنواع)', en:'Schweppes (All Flavors)', ru:'Швепс (Все вкусы)'}}}},
-  {{id:'d4', price:12, name:{{he:'ספרינג', ar:'ספרינג', en:'Spring', ru:'Спринг'}}}},
-  {{id:'d5', price:12, name:{{he:'מים של שוופס (כל הטעמים)', ar:'مياه شويبس الممتعة (جميع الأنواع)', en:'Schweppes Water (All Flavors)', ru:'Вода Швепс (Все вкусы)'}}}},
-  {{id:'d6', price:9,  name:{{he:'עין גדי', ar:'عين جيدي', en:'Ein Gedi Water', ru:'Эйн Геди'}}}},
-  {{id:'d7', price:12, name:{{he:'תפוזינה (כל הטעמים)', ar:'تפوزينا (جميع الأنواع)', en:'Tapuzina (All Flavors)', ru:'Тапузина (Все вкусы)'}}}},
-  {{id:'d8', price:10, name:{{he:'ספרייט (כל הטעמים)', ar:'سبرايت (جميع الأنواع)', en:'Sprite (All Flavors)', ru:'Спрайт (Все вкусы)'}}}},
-  {{id:'d9', price:10, name:{{he:'פנטה', ar:'فانتا', en:'Fanta', ru:'Фанта'}}}}
+// Helpers
+const L = (ar, he, en, ru)=>({ar,he,en:en||he,ru:ru||he});
+const money = n => "₪ " + (Math.round(n*100)/100).toFixed(2).replace(/\.00$/,'');
+
+// Option groups common
+const gChanges = {id:'changes',label:L('تغييرات ممكنة','שינויים אפשריים','Possible changes','Изменения'),type:'multi',max:4,options:[
+  {id:'no_pita',label:L('بدون أرغفة','ללא פיתות')},
+  {id:'no_garlic_lemon',label:L('بدون ثومة ليمون','ללא שום לימון')},
+  {id:'no_spicy',label:L('بدون صلصة حارة','ללא חריף')},
+  {id:'no_pickles',label:L('بدون مخللات','ללא חמוצים')},
+]};
+const gPaidAddons = {id:'addons',label:L('إضافات ممكنة مع دفع','תוספות אפשריות בתשלום'),type:'multi',max:8,options:[
+  {id:'extra_pita',label:L('رغيف زيادة','תוספת פיתה'),price:3},
+  {id:'spicy',label:L('صلصة حارة 🌶','חריף 🌶'),price:3},
+  {id:'garlic_lemon',label:L('ثومة ليمون','שום לימון'),price:3},
+  {id:'more_pickles',label:L('مخللات زيادة','אקסטרה חמוצים'),price:3},
+  {id:'egg',label:L('بيضة مسلوقة','ביצה קשה'),price:4},
+  {id:'more_tahini',label:L('طحينة زيادة','אקסטרה טחינה'),price:5},
+  {id:'chopped_salad',label:L('سلطة مفرومة','סלט קצוץ'),price:28},
+]};
+const gSizeChips = {id:'size_chips',label:L('اختاروا حجم','בחרו גודל','Choose size','Выберите размер'),type:'single',min:1,max:1,options:[
+  {id:'small',label:L('صغير','קטן','Small','Мал.'),price:0},
+  {id:'large',label:L('كبير','גדול','Large','Больш.'),price:12},
+]};
+const gSizeWeight = (delta=16)=>({id:'size_weight',label:L('اختاروا حجم','בחרו גודל','Choose size','Выберите размер'),type:'single',min:1,max:1,options:[
+  {id:'250g',label:L('250 غرام','250 גרם','250 g','250 г'),price:0},
+  {id:'500g',label:L('500 غرام','500 גרם','500 g','500 г'),price:delta},
+]});
+const gSaladsSpreads = {id:'salads',label:L('اختاروا سلطات وصلصات','בחרו ממרחים וסלטים'),type:'multi',max:10,options:[
+  {id:'cabbage_mayo',label:L('ملفوف بميونيز','כרוב במיונז')},
+  {id:'parsley',label:L('بقدونس','פטרוזיליה')},
+  {id:'garlic_lemon_free',label:L('ثومة ليمون','שום לימון')},
+  {id:'spicy_free',label:L('صلصة حارة','חריף 🌶')},
+  {id:'tahini_free',label:L('طحينة','טחינה')},
+  {id:'hummus_free',label:L('حمص','חומוס')},
+  {id:'veg_salad',label:L('سلطة خضار','סלט ירקות')},
+  {id:'cabbage_red',label:L('ملفوف أحمر','כרוב אדום')},
+  {id:'cabbage_white',label:L('ملفوف أبيض','כרוב לבן')},
+  {id:'dry',label:L('بدون إضافات - ناشف','ללא תוספות - יבש')},
+]};
+
+// Catalog (categories + items)
+const CATALOG = [
+  { id:'popular', title:L('الأكثر طلبًا','המוזמנים ביותר','Popular','Популярное'), items:[
+    { id:'falafel_plate', name:L('حبات فلافل بصحن','כדורי פלאפל בצלחת'), desc:L('5 حبات','5 כדורי פלאפל'), price:15, groups:[gPaidAddons] },
+  ]},
+  { id:'hummus', title:L('حمص','חומוס','Hummus','Хумус'), items:[
+    { id:'hummus_classic', name:L('حمص كلاسي','חומוס קלאסי'), price:35, groups:[gChanges] },
+    { id:'hummus_gargerim', name:L('حمص حب','חומוס גרגירים'), price:35, groups:[gChanges] },
+    { id:'hummus_tahini', name:L('حمص طحينة','חומוס טחינה'), price:35, groups:[gChanges] },
+    { id:'hummus_foul', name:L('حمص فول','חומוס פול'), price:35, groups:[gChanges] },
+    { id:'msabaha', name:L('مسبحة','מסבחה'), price:35, groups:[gChanges] },
+    { id:'triangle', name:L('مثلث (حمص+فول+مسبحة)','משולש (חומוס, פול ומסבחה)'), price:35, groups:[gChanges] },
+    { id:'hummus_mushroom', name:L('حمص فطر','חומוס פטריות'), price:43, groups:[gChanges] },
+    { id:'hamshuka', name:L('حمشوكة (حمص مع شكشوكة)','חמשוקה (חומוס עם שקשוקה)'), price:49, groups:[gChanges] },
+    { id:'hummus_meat', name:L('حمص لحمة مفرومة','חומוס בשר שייטל'), price:55, groups:[gChanges] },
+    { id:'hummus_msabaha', name:L('حمص مسبحة','חומוס מסבחה'), price:35, groups:[gChanges] },
+    { id:'pita_hummus', name:L('رغيف حمص','פיתה חומוס'), desc:L('رغيف حمص، سلطة وتشيبس','פיתה חומוס, סלט וצ׳יפס'), price:24 },
+    { id:'pita_hummus_foul', name:L('رغيف حمص فول','פיתה חומוס פול'), desc:L('رغيف حمص، فول وبيضة','פיתה חומוס, פול וביצה'), price:24 },
+    { id:'pita_msabaha', name:L('رغيف مسبحة','פיתה מסבחה'), desc:L('رغيف مسبحة، سلطة وتشيبس','פיתה מסבחה, סלט וצ׳יפס'), price:24 },
+  ]},
+  { id:'schnitzel', title:L('شنيتسل وأكثر','שניצל ועוד','Schnitzel & more','Шницель и др.'), items:[
+    { id:'schnitzel_pita', name:L('شنيتسل برغيف','שניצל בפיתה'), desc:L('شنيتسل مقرمش مع سلطات وصلصات للاختيار','שניצל קריספי עם סלטים וממרחים לבחירה'), price:35, groups:[gPaidAddons,gChanges,gSaladsSpreads] },
+    { id:'schnitzel_baguette', name:L('شنيتسل بباجيت','שניצל בבגט'), desc:L('شنيتسل مقرمش مع سلطات وصلصات للاختيار','שניצל קריספי עם סלטים וממרחים לבחירה'), price:45, groups:[gPaidAddons,gChanges,gSaladsSpreads,gSizeChips] },
+    { id:'schnitzel_plate', name:L('شنيتسل بصحن','שניצל בצלחת'), desc:L('يقدم مع حمص، سلطة مفرومة، ملفوف بميونيز ورغيفين','מוגש עם חומוס, סלט קצוץ, כרוב במיונז ושתי פיתות'), price:55, groups:[gPaidAddons,{...gChanges,options:[
+      {id:'no_pita',label:L('بدون أرغفة','ללא פיתות')},
+      {id:'no_cabbage_mayo',label:L('بدون ملفوف بميونيز','ללא כרוב מיונז')},
+      {id:'no_chopped_salad',label:L('بدون سلطة مفرومة','ללא סלט קצוץ')},
+      {id:'no_hummus',label:L('بدون حمص','ללא חומוס')},
+    ]}] },
+    { id:'shakshuka_plate', name:L('شكشوكة بصحن','שקשוקה בצלחת'), desc:L('يقدم مع مخللات، ثومة ليمون، صلصة حارة ورغيفين','מוגש עם חמוצים, שום לימון, חריף ושתי פיתות'), price:45, groups:[gPaidAddons,gChanges] },
+    { id:'falafel_pita', name:L('رغيف فلافل','פיתה פלאפל'), price:22, groups:[gSaladsSpreads] },
+    { id:'chicken_plate', name:L('صدر دجاج بصحن','חזה עוף בצלחת'), desc:L('يقدم مع حمص','מוגש עם חומוס'), price:55, groups:[gPaidAddons,{id:'swap',label:L('تغييرات ممكنة','שינויים אפשריים'),type:'single',max:1,options:[{id:'salad_instead',label:L('سلطة بدل حمص','סלט במקום חומוס')}]}] },
+    { id:'kebab_pita', name:L('كباب برغيف','קבב בפיתה'), desc:L('سلطات وصلصات للاختيار','סלטים וממרחים לבחירה'), price:40, groups:[gPaidAddons,gChanges,gSaladsSpreads] },
+    { id:'kebab_baguette', name:L('كباب بباجيت','קבב בבגט'), desc:L('سلطات وصلصات للاختيار','סלטים וממרחים לבחירה'), price:50, groups:[gPaidAddons,gChanges,gSaladsSpreads] },
+    { id:'kebab_plate', name:L('كباب بصحن','קבב בצלחת'), desc:L('يقدم مع مخللات ورغيفين','מוגש עם חמוצים ושתי פיתות'), price:60, groups:[gPaidAddons] },
+    { id:'hot_sausage_pita', name:L('نقانق حارة برغيف','חריפות בפיתה'), desc:L('سلطات وصلصات للاختيار','סלטים וממרחים לבחירה'), price:35, groups:[gPaidAddons,gChanges,gSaladsSpreads] },
+  ]},
+  { id:'by_weight', title:L('بالوزن','במשקל','By Weight','На вес'), items:[
+    { id:'weight_hummus', name:L('حمص — بالوزن','חומוס — במשקל'), price:20, groups:[gSizeWeight(16)] },
+    { id:'weight_tahini', name:L('طحينة — بالوزن','טחינה — במשקל'), price:22, groups:[gSizeWeight(0)] },
+    { id:'weight_foul', name:L('فول — بالوزن','פול — במשקל'), price:20, groups:[gSizeWeight(16)] },
+    { id:'weight_msabaha', name:L('مسبحة — بالوزن','מסבחה — במשקל'), price:20, groups:[gSizeWeight(16)] },
+    { id:'weight_cabbage_white', name:L('ملفوف أبيض — بالوزن','כרוב לבן — במשקל'), price:20, groups:[gSizeWeight(15)] },
+    { id:'weight_cabbage_red', name:L('ملفوف أحمر — بالوزن','כרוב אדום — במשקל'), price:20, groups:[gSizeWeight(15)] },
+  ]},
+  { id:'addons', title:L('إضافات','תוספות','Extras','Добавки'), items:[
+    { id:'falafel_plate_addon', name:L('حبات فلافل بصحن','כדורי פלאפל בצלחת'), desc:L('5 حبات','5 כדורי פלאפל'), price:15, groups:[gPaidAddons] },
+    { id:'chips', name:L('تشيبس','צ\'יפס'), price:20, groups:[gSizeChips] },
+    { id:'veg_salad_bowl', name:L('سلطة خضار مفرومة','סלט ירקות קצוץ'), desc:L('خيار، بندورة وبصل','מלפפון, עגבניה ובצל'), price:28 },
+    { id:'garlic_lemon_sauce', name:L('ثومة ليمون','שום לימון'), price:3 },
+    { id:'tahini_extra', name:L('طحينة زيادة','אקסטרה טחינה'), price:5 },
+    { id:'egg_single', name:L('بيضة','ביצה'), price:4 },
+    { id:'pita', name:L('رغيف','פיתה'), price:3 },
+    { id:'pickles_extra', name:L('مخللات زيادة','אקסטרה חמוצים'), price:3 },
+    { id:'spicy_sauce', name:L('صلصة حارة','חריף 🌶'), price:3 },
+  ]},
+  { id:'soft_drinks', title:L('مشروبات خفيفة 🥤','שתייה קלה 🥤','Soft Drinks 🥤','Напитки 🥤'), items:[
+    { id:'coke_can', name:L('علبة كوكاكولا','פחית קוקה קולה'), price:12 },
+    { id:'coke_zero_can', name:L('علبة كولا زيرو','פחית קולה זירו'), price:12 },
+    { id:'fuze_tea_peach', name:L('فيوز تي خوخ','פיוז טי אפרסק'), price:13 },
+    { id:'water_naveh', name:L('مياه معدنية نفيعوت','מים מינרליים נביעות'), price:10 },
+    { id:'kinley_soda', name:L('كينلي صودا','קינלי סודה'), price:10 },
+    { id:'prigat_orange_glass', name:L('بريجات برتقال - زجاج','פריגת תפוזים - בקבוק זכוכית'), price:12 },
+    { id:'prigat_grape_glass', name:L('بريجات عنب - زجاج','פריגת ענבים - בקבוק זכוכית'), price:12 },
+    { id:'prigat_grapefruit_glass', name:L('بريجات جريب فروت - زجاج','פריגת אשכוליות - בקבוק זכוכית'), price:12 },
+    { id:'schweppes_berry_lime', name:L('شويبس توت ليمون - زجاج','שוואפס תות ליים - בקבוק זכוכית'), price:12 },
+    { id:'schweppes_apple', name:L('شويبس تفاح - زجاج','שוואפס תפוחים - בקבוק זכוכית'), price:12 },
+    { id:'schweppes_forest', name:L('شويبس توت بري - زجاج','שוואפס פירות יער - בקבוק זכוכית'), price:12 },
+    { id:'schweppes_grape', name:L('شويبس عنب - زجاج','שוואפס ענבים - בקבוק זכוכית'), price:12 },
+    { id:'schweppes_lemon', name:L('شويبس ليمون - زجاج','שוואפס לימון - בקבוק זכוכית'), price:12 },
+    { id:'schweppes_mojito', name:L('شويبس موخيتو - زجاج','שוואפס מוחיטו - בקבוק זכוכית'), price:12 },
+    { id:'schweppes_peach', name:L('شويبس خوخ - زجاج','שוואפס אפרסק - בקבוק זכוכית'), price:12 },
+    { id:'flavored_water_apple', name:L('مياه بطعم التفاح','מים בטעם תפוח'), price:12 },
+    { id:'flavored_water_peach', name:L('مياه بطعم الخوخ','מים בטעם אפרסק'), price:12 },
+    { id:'flavored_water_grape', name:L('مياه بطعم العنب','מים בטעם ענבים'), price:12 },
+  ]},
 ];
 
-// ===== State =====
-let lang = localStorage.getItem('lang') || 'he';
-let cart = JSON.parse(localStorage.getItem('cartV2') || '{{}}');
+// State
+let LOCALE = localStorage.getItem('locale') || '';
+let CART = [];
 
-// ===== Helpers =====
-const $ = (s)=> document.querySelector(s);
-function setDir(l) {{ document.documentElement.dir = (l==='ar'||l==='he')?'rtl':'ltr'; document.documentElement.lang=l; }}
-function money(v) {{ return v + ' ' + T[lang].currency; }}
-function items() {{ return Object.values(cart); }}
-function saveCart() {{ localStorage.setItem('cartV2', JSON.stringify(cart)); }}
-function addItem(id,name,price) {{ cart[id] = cart[id]? {{...cart[id], qty:cart[id].qty+1}} : {{id,name,price,qty:1}}; saveCart(); drawCart(); }}
-function decItem(id) {{ if(!cart[id])return; cart[id].qty-=1; if(cart[id].qty<=0) delete cart[id]; saveCart(); drawCart(); }}
-function rmItem(id) {{ delete cart[id]; saveCart(); drawCart(); }}
+// UI elements
+const el = sel => document.querySelector(sel);
+const root = el('#catalog-root');
+const gate = el('#gate');
+const langSwitch = el('#lang-switch');
 
-// ===== Language overlay =====
-function openLang() {{ $('#langOverlay').classList.remove('hide'); }}
-function closeLang() {{ $('#langOverlay').classList.add('hide'); }}
-function setLang(l) {{
-  lang = l; localStorage.setItem('lang', lang);
-  closeLang(); translateUI(); drawDrinks(); drawCart();
-}}
+function setLocale(code){
+  LOCALE = code; localStorage.setItem('locale', code);
+  document.documentElement.dir = T[code].dir;
+  renderAll();
+  gate.style.display='none';
+}
 
-// ===== UI =====
-function translateUI(){{
-  // navbar
-  const nav = $('#menuNav').querySelectorAll('a');
-  const keys = ['home','menus','shop','events','contact'];
-  nav.forEach((a,i)=> a.textContent = T[lang][keys[i]]);
-  $('#reserveBtn').textContent = T[lang].reserve;
-  $('#brandSmall').textContent = T[lang].brandSmall;
-  $('#heroTitle').textContent = T[lang].heroTitle;
-  $('#heroSubtitle').textContent = T[lang].heroSubtitle;
-  $('#drinksTitle').textContent = T[lang].drinks;
-  setDir(lang);
-}}
+function renderHeader(){
+  const i = T[LOCALE];
+  el('#tagline').textContent = i.brandTagline;
+  el('#nav-menu').textContent = i.nav.menu;
+  el('#nav-order').textContent = i.nav.order;
+  el('#nav-order').href = WOLT_URL;
+  el('#nav-about').textContent = i.nav.about;
+  el('#hero-title').textContent = i.hero.title;
+  el('#hero-sub').textContent = i.hero.subtitle;
+  el('#hero-menu').textContent = i.hero.ctaMenu;
+  el('#hero-order').textContent = i.hero.ctaOrder;
+}
 
-function drawDrinks(){{
-  const list = DRINKS.map(d => {{
-    const nm = d.name[lang];
-    return `<div class="card">
-      <div style="font-weight:800;color:#214A47">${{nm}}</div>
-      <div class="price">₪ ${{d.price}}</div>
-      <div class="add"><button class="btn-gold" onclick="addItem('${{d.id}}','${{nm.replace(/'/g,"\\'")}}',${{d.price}})">🛒 ${{T[lang].add}}</button></div>
-    </div>`;
-  }}).join('');
-  $('#drinks').innerHTML = list;
-}}
+function renderAbout(){
+  const i = T[LOCALE];
+  el('#about-title').textContent = i.about.title;
+  el('#about-text').textContent = i.about.text;
+  el('#tel-link').textContent = i.about.callUs + ': ' + PHONE;
+  el('#map-link').textContent = i.about.location;
+  el('#map-link').href = MAPS_URL;
+  el('#map-img-link').href = MAPS_URL;
+  el('#hours-title').textContent = i.about.hours;
+  const hours = i.hoursDays.map(d=>`<div style="background:#141414;border-radius:10px;padding:8px"><div style="opacity:.8;font-size:12px">${d}</div><div style="font-weight:700">${i.hoursLine.split(': ')[1]}</div></div>`).join('');
+  el('#hours-grid').innerHTML = hours;
+  el('#rights').textContent = i.rights;
+}
 
-function drawCart(){{
-  const panel = $('#cartPanel');
-  const count = items().reduce((s,p)=> s+p.qty, 0);
-  $('#navCart').textContent = `${{T[lang].cart}} (${{count}})`;
-  if(count===0) {{ panel.style.display='none'; return; }}
-  let html = '';
-  items().forEach(p=> {{
-    html += `<div class="cart-row">
-      <div><div style="font-weight:700">${{p.name}}</div><div class="tiny">₪ ${{p.price}}</div></div>
-      <div class="qty">
-        <button onclick="decItem('${{p.id}}')">-</button>
-        <span>${{p.qty}}</span>
-        <button onclick="addItem('${{p.id}}','${{p.name.replace(/'/g,"\\'")}}',${{p.price}})">+</button>
-        <button onclick="rmItem('${{p.id}}')">✕</button>
-      </div>
-    </div>`;
-  }});
-  html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-weight:800">
-    <span>${{T[lang].total}}</span><span>₪ ${{items().reduce((s,p)=>s+p.price*p.qty,0)}}</span></div>
-    <button class="btn-gold" style="width:100%;margin-top:8px">${{T[lang].checkout}}</button>`;
-  panel.innerHTML = html;
-  panel.style.display = 'block';
-}}
+function renderCatalog(){
+  root.innerHTML = '';
+  CATALOG.forEach(cat=>{
+    const h = document.createElement('h2'); h.className='cat'; h.textContent = cat.title[LOCALE]; root.appendChild(h);
+    const grid = document.createElement('div'); grid.className='grid'; root.appendChild(grid);
+    cat.items.forEach(item=>{
+      const card = document.createElement('button'); card.className='card';
+      card.innerHTML = `<div class="flex"><div><div class="name" style="font-weight:800">${item.name[LOCALE]}</div>${item.desc?`<div style="opacity:.7;font-size:13px">${item.desc[LOCALE]}</div>`:''}</div><div class="price" style="margin-inline-start:auto">${money(item.price)}</div></div>`;
+      card.addEventListener('click',()=>openItem(item));
+      grid.appendChild(card);
+    });
+  });
+}
 
-// Events
-$('#cartBtn').addEventListener('click', ()=> {{ const p=$('#cartPanel'); p.style.display=(p.style.display==='block')?'none':'block'; }});
+function openItem(item){
+  const modal = el('#modal'); modal.classList.add('active');
+  el('#modal-title').textContent = item.name[LOCALE];
+  let qty = 1;
+  el('#qty-val').textContent = qty;
+  let chosen = {};
+  function extraSum(){
+    let s = 0;
+    (item.groups||[]).forEach(g=>{
+      (chosen[g.id]||[]).forEach(id=>{
+        const opt = g.options.find(o=>o.id===id);
+        if(opt && opt.price) s += opt.price;
+      });
+    });
+    return s;
+  }
+  function updateTotal(){
+    const total = (item.price + extraSum())*qty;
+    el('#add-to-cart').textContent = `${T[LOCALE].hero.ctaOrder} — ${money(total)}`;
+  }
+  // body
+  const body = el('#modal-body'); body.innerHTML='';
+  if(item.desc){ const p=document.createElement('p'); p.style.opacity='.85'; p.textContent=item.desc[LOCALE]; body.appendChild(p); }
+  (item.groups||[]).forEach(g=>{
+    const box = document.createElement('div'); box.className='group';
+    box.innerHTML = `<div class="label">${g.label[LOCALE]}</div>`;
+    g.options.forEach(o=>{
+      const row = document.createElement('label'); row.className='option';
+      const left = document.createElement('div'); left.style.display='flex'; left.style.alignItems='center';
+      const cb = document.createElement('span'); cb.className='checkbox'; cb.innerHTML='<span>✓</span>';
+      const txt = document.createElement('span'); txt.textContent=o.label[LOCALE];
+      left.appendChild(cb); left.appendChild(txt);
+      const right = document.createElement('span'); right.style.opacity='.9'; right.textContent = o.price? ('+ '+money(o.price)) : '';
+      row.appendChild(left); row.appendChild(right);
+      row.addEventListener('click',()=>{
+        const arr = chosen[g.id]||[];
+        if(g.type==='single'){ chosen[g.id]=[o.id]; }
+        else{
+          if(arr.includes(o.id)) chosen[g.id]=arr.filter(x=>x!==o.id); else chosen[g.id]=[...arr,o.id];
+        }
+        // update checkmarks
+        [...box.querySelectorAll('.option')].forEach((elRow,i)=>{
+          const opt = g.options[i];
+          const mark = elRow.querySelector('.checkbox');
+          if((chosen[g.id]||[]).includes(opt.id)) mark.classList.add('checked'); else mark.classList.remove('checked');
+        });
+        updateTotal();
+      });
+      box.appendChild(row);
+    });
+    body.appendChild(box);
+  });
+  // qty handlers
+  el('#qty-inc').onclick=()=>{qty++; el('#qty-val').textContent=qty; updateTotal();}
+  el('#qty-dec').onclick=()=>{qty=Math.max(1,qty-1); el('#qty-val').textContent=qty; updateTotal();}
+  el('#modal-close').onclick=()=>{modal.classList.remove('active');}
+  el('#add-to-cart').onclick=()=>{
+    const total = (item.price + extraSum())*qty;
+    CART.push({id:Date.now()+'',name:item.name[LOCALE],qty, total});
+    renderCart();
+    modal.classList.remove('active');
+  }
+  updateTotal();
+}
+
+function renderCart(){
+  const list = el('#cart-lines'); list.innerHTML='';
+  if(CART.length===0){ list.innerHTML = `<div class="muted">${LOCALE==='ar'?'لا توجد عناصر بعد — الدفع عند الكاشير.': LOCALE==='he'?'אין פריטים — התשלום בקופה.': LOCALE==='ru'?'Нет товаров — оплата на кассе.':'No items yet — pay at cashier.'}</div>`; }
+  CART.forEach(it=>{
+    const line = document.createElement('div'); line.className='line';
+    line.innerHTML = `<div><div style="font-weight:700;font-size:13px">${it.name}</div><div class="muted">×${it.qty}</div></div><div>${money(it.total)}</div><button style="background:transparent;border:0;color:#bbb;cursor:pointer">✕</button>`;
+    line.querySelector('button').onclick=()=>{ CART = CART.filter(x=>x!==it); renderCart(); };
+    list.appendChild(line);
+  });
+  const sum = CART.reduce((s,x)=>s+x.total,0);
+  el('#cart-sum').textContent = money(sum);
+  el('#cart-title').textContent = (T[LOCALE].cart || 'Cart') + ' / السلة';
+  el('#cashier-note').textContent = LOCALE==='ar'?'الدفع يتم عند الاستلام في الكاشير — لا يوجد دفع أونلاين.': LOCALE==='he'?'התשלום מתבצע בקופה — ללא תשלום אונליין.': LOCALE==='ru'?'Оплата на кассе при получении — онлайн-оплаты нет.':'Payment is at the cashier — no online payment.';
+}
+
+function renderAll(){
+  if(!LOCALE){ gate.style.display='flex'; return; }
+  renderHeader(); renderAbout(); renderCatalog(); renderCart();
+  // dock labels (active button)
+  langSwitch.querySelectorAll('button').forEach(b=>{
+    b.style.background = b.dataset.lang===LOCALE ? 'var(--orange)' : '#fff';
+    b.style.color = 'var(--black)';
+  });
+}
+
+document.querySelectorAll('.gate .langs button').forEach(b=>b.addEventListener('click',()=>setLocale(b.dataset.lang)));
+langSwitch.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>setLocale(b.dataset.lang)));
 
 // Init
-translateUI(); drawDrinks(); drawCart();
-// Show language chooser only if not set previously
-if(!localStorage.getItem('lang')) {{ openLang(); }} else {{ closeLang(); }}
+document.getElementById('year').textContent = new Date().getFullYear();
+el('#hero-order').href = WOLT_URL; el('#nav-order').href = WOLT_URL;
+el('#map-link').href = MAPS_URL; el('#map-img-link').href = MAPS_URL;
+if(LOCALE){ setLocale(LOCALE); } else { gate.style.display='flex'; }
 </script>
 </body>
 </html>
-"""
-
-out_dir = "/mnt/data/royal_bull_style"
-os.makedirs(out_dir, exist_ok=True)
-index_path = os.path.join(out_dir, "index.html")
-with open(index_path, "w", encoding="utf-8") as f:
-    f.write(html)
-
-zip_path = "/mnt/data/חומוס גרגירים.zip"
-with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
-    z.write(index_path, arcname="index.html")
-
-zip_path
